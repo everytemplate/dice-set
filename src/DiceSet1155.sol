@@ -2,11 +2,11 @@
 pragma solidity ^0.8.13;
 
 import {ObjectIdAuto} from "@everyprotocol/periphery/libraries/Allocator.sol";
+import {ERC1155Compatible, Descriptor} from "@everyprotocol/periphery/utils/ERC1155Compatible.sol";
 import {ISetRegistry, SetRegistryAdmin} from "@everyprotocol/periphery/utils/SetRegistryAdmin.sol";
 import {ISetRegistryHook, SetContext, SetRegistryHook} from "@everyprotocol/periphery/utils/SetRegistryHook.sol";
-import {Descriptor, ISet, SetSolo} from "@everyprotocol/periphery/utils/SetSolo.sol";
 
-contract DiceSet is SetSolo, SetRegistryHook, SetRegistryAdmin {
+contract DiceSet1155 is ERC1155Compatible, SetRegistryHook, SetRegistryAdmin {
     using ObjectIdAuto for ObjectIdAuto.Storage;
 
     error KindNotSpecified();
@@ -49,16 +49,31 @@ contract DiceSet is SetSolo, SetRegistryHook, SetRegistryAdmin {
         _postUpdate(id, od, elems);
     }
 
-    function _roll() internal view returns (bytes32) {
-        return keccak256(abi.encodePacked(block.prevrandao, tx.origin, gasleft()));
+    function supportsInterface(bytes4 interfaceId)
+        external
+        pure
+        override(ERC1155Compatible, SetRegistryHook)
+        returns (bool)
+    {
+        return interfaceId == type(ISetRegistryHook).interfaceId || ERC1155Compatible._supportsInterface(interfaceId);
     }
 
-    function supportsInterface(bytes4 interfaceId) external pure override(SetSolo, SetRegistryHook) returns (bool) {
-        return interfaceId == type(ISetRegistryHook).interfaceId || SetSolo._supportsInterface(interfaceId);
+    function _roll() internal view returns (bytes32) {
+        return keccak256(abi.encodePacked(block.prevrandao, tx.origin, gasleft()));
     }
 
     function _objectURI() internal view virtual override returns (string memory) {
         ISetRegistry setr = ISetRegistry(SetContext.getSetRegistry());
         return setr.setURI(SetContext.getSetId());
+    }
+
+    function _tokenURI(uint64 id, uint32 rev) internal view virtual override returns (string memory) {
+        ISetRegistry setr = ISetRegistry(SetContext.getSetRegistry());
+        return setr.setURI(SetContext.getSetId(), id, rev);
+    }
+
+    function _contractURI() internal view virtual override returns (string memory) {
+        ISetRegistry setr = ISetRegistry(SetContext.getSetRegistry());
+        return setr.setURI(1, SetContext.getSetId(), SetContext.getSetRev());
     }
 }
