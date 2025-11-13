@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import {ObjectIdAuto} from "@everyprotocol/periphery/libraries/Allocator.sol";
 import {ISetRegistry, SetRegistryAdmin} from "@everyprotocol/periphery/utils/SetRegistryAdmin.sol";
 import {ISetRegistryHook, SetContext, SetRegistryHook} from "@everyprotocol/periphery/utils/SetRegistryHook.sol";
-import {Descriptor, ISet, SetSolo} from "@everyprotocol/periphery/utils/SetSolo.sol";
+import {Descriptor, SetSolo} from "@everyprotocol/periphery/utils/SetSolo.sol";
 
 contract DiceSet is SetSolo, SetRegistryHook, SetRegistryAdmin {
     using ObjectIdAuto for ObjectIdAuto.Storage;
@@ -50,6 +50,7 @@ contract DiceSet is SetSolo, SetRegistryHook, SetRegistryAdmin {
     }
 
     function _roll() internal view returns (bytes32) {
+        /// forge-lint: disable-next-item(asm-keccak256)
         return keccak256(abi.encodePacked(block.prevrandao, tx.origin, gasleft()));
     }
 
@@ -57,6 +58,7 @@ contract DiceSet is SetSolo, SetRegistryHook, SetRegistryAdmin {
         return interfaceId == type(ISetRegistryHook).interfaceId || SetSolo._supportsInterface(interfaceId);
     }
 
+    /// forge-lint: disable-next-item(mixed-case-function)
     function _objectURI() internal view virtual override returns (string memory) {
         ISetRegistry setr = ISetRegistry(SetContext.getSetRegistry());
         return setr.setURI(SetContext.getSetId());

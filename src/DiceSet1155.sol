@@ -59,19 +59,23 @@ contract DiceSet1155 is ERC1155Compatible, SetRegistryHook, SetRegistryAdmin {
     }
 
     function _roll() internal view returns (bytes32) {
+        /// forge-lint: disable-next-item(asm-keccak256)
         return keccak256(abi.encodePacked(block.prevrandao, tx.origin, gasleft()));
     }
 
+    /// forge-lint: disable-next-item(mixed-case-function)
     function _objectURI() internal view virtual override returns (string memory) {
         ISetRegistry setr = ISetRegistry(SetContext.getSetRegistry());
         return setr.setURI(SetContext.getSetId());
     }
 
+    /// forge-lint: disable-next-item(mixed-case-function)
     function _tokenURI(uint64 id, uint32 rev) internal view virtual override returns (string memory) {
         ISetRegistry setr = ISetRegistry(SetContext.getSetRegistry());
         return setr.setURI(SetContext.getSetId(), id, rev);
     }
 
+    /// forge-lint: disable-next-item(mixed-case-function)
     function _contractURI() internal view virtual override returns (string memory) {
         ISetRegistry setr = ISetRegistry(SetContext.getSetRegistry());
         return setr.setURI(1, SetContext.getSetId(), SetContext.getSetRev());
