@@ -20,7 +20,7 @@ contract DiceSet1155 is ERC1155Compatible, SetRegistryHook, SetRegistryAdmin {
         SetContext.setKindRev(kindRev);
     }
 
-    function mint(address to, uint64 id0) external returns (uint64 id, Descriptor memory desc) {
+    function mint(address to, uint64 id0, bytes memory) external returns (uint64 id, Descriptor memory desc) {
         (uint64 setId, uint32 setRev) = (SetContext.getSetId(), SetContext.getSetRev());
         if (setId == 0 || setRev == 0) revert SetNotRegistered();
         (uint64 kindId, uint32 kindRev) = (SetContext.getKindId(), SetContext.getKindRev());
