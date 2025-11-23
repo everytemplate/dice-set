@@ -9,7 +9,7 @@
     "deploy": "every set deploy src/DiceSet1155.sol:DiceSet1155 ${SET_REG?} ${KIND_ID?} ${KIND_REV?} --json register/contract.json ",
     "register": "every set register $(every pick contract.addr matter.hash=elements/data.json) --json register/set.json",
     "upload": "every matter register elements/data.json elements/picture.png --json register/matter.json",
-    "auto": "run-s 'upload -- {@}' 'deploy -- {@}' 'register -- {@}' --",
+    "all": "run-s 'upload -- {@}' 'deploy -- {@}' 'register -- {@}' --",
     "predeploy": "run-s build"
   },
   "dependencies": {

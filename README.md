@@ -74,10 +74,10 @@ All relevant commands are available as npm/bun scripts defined in `package.json`
 
 There is also an all-in-one script:
 
-* `auto`
+* `all`
 
 Example invocation:
 
 ```bash
-SET_REGISTRY=0xab..cd KIND_ID=17 KIND_REV=1 bun auto -u UNIVERSE -fa ACCOUNT -P PASSWORD_FILE
+SET_REGISTRY=0xab..cd KIND_ID=17 KIND_REV=1 bun all -u UNIVERSE -fa ACCOUNT -P PASSWORD_FILE
 ```
