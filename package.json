@@ -1,16 +1,15 @@
 {
   "name": "scripts",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "private": true,
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "forge install && forge build",
-    "deploy": "every set deploy --json register/contract.json src/DiceSet1155.sol:DiceSet1155 ${SET_REG?} ${KIND_ID?} ${KIND_REV?}",
-    "register": "every set register $(every pick contract.addr matter.hash) --json register/set.json",
-    "upload": "every matter register elements/data.json --json register/matter.json",
-    "all": "run-s 'upload -- {@}' 'deploy -- {@}' 'register -- {@}' --",
-    "vars": "bash vars.sh",
+    "build": "forge build",
+    "deploy": "every set deploy src/DiceSet1155.sol:DiceSet1155 ${SET_REG?} ${KIND_ID?} ${KIND_REV?} --json register/contract.json ",
+    "register": "every set register $(every pick contract.addr matter.hash=elements/data.json) --json register/set.json",
+    "upload": "every matter register elements/data.json elements/picture.png --json register/matter.json",
+    "auto": "run-s 'upload -- {@}' 'deploy -- {@}' 'register -- {@}' --",
     "predeploy": "run-s build"
   },
   "dependencies": {

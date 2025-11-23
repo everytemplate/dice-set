@@ -1,66 +1,58 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {ObjectIdAuto} from "@everyprotocol/periphery/libraries/Allocator.sol";
-import {ISetRegistry, SetRegistryAdmin} from "@everyprotocol/periphery/utils/SetRegistryAdmin.sol";
-import {ISetRegistryHook, SetContext, SetRegistryHook} from "@everyprotocol/periphery/utils/SetRegistryHook.sol";
-import {Descriptor, SetSolo} from "@everyprotocol/periphery/utils/SetSolo.sol";
+import {SetLinked, Descriptor} from "@everyprotocol/periphery/sets/SetLinked.sol";
 
-contract DiceSet is SetSolo, SetRegistryHook, SetRegistryAdmin {
-    using ObjectIdAuto for ObjectIdAuto.Storage;
-
+contract DiceSet1155 is SetLinked {
     error KindNotSpecified();
+    error KindRevUnavailable();
     error SetNotRegistered();
+    error ObjectIdAutoOnly();
 
-    ObjectIdAuto.Storage internal _idManager;
+    uint64 _minted;
+    uint64 _kindId;
+    uint32 _kindRev;
 
-    constructor(address setRegistry, uint64 kindId, uint32 kindRev) SetRegistryHook(setRegistry) {
-        if (kindRev == 0 || kindId == 0) revert KindNotSpecified();
-        SetContext.setKindId(kindId);
-        SetContext.setKindRev(kindRev);
+    constructor(address setRegistry, uint64 kindId, uint32 kindRev) {
+        _SetLinked_initializeFrom(setRegistry);
+        if (kindRev == 0) revert KindNotSpecified();
+        _kindId = kindId;
+        _kindRev = kindRev;
     }
 
-    function mint(address to, uint64 id0) external returns (uint64 id, Descriptor memory desc) {
-        (uint64 setId, uint32 setRev) = (SetContext.getSetId(), SetContext.getSetRev());
-        if (setId == 0 || setRev == 0) revert SetNotRegistered();
-        (uint64 kindId, uint32 kindRev) = (SetContext.getKindId(), SetContext.getKindRev());
-        if (kindId == 0 || kindRev == 0) revert KindNotSpecified();
-        desc = Descriptor({traits: 0, rev: 1, setRev: setRev, kindRev: kindRev, kindId: kindId, setId: setId});
+    function mint(address to, uint64 id0, bytes memory) external returns (uint64 id, Descriptor memory desc) {
+        if (id0 != 0) revert ObjectIdAutoOnly();
+        id = ++_minted;
 
-        id = _idManager.allocate(id0);
+        (uint64 setId, uint32 setRev) = SetLinked.getSetIdRev();
+        if (setId == 0 || setRev == 0) revert SetNotRegistered();
+        uint32 kindRev = SetLinked.checkKindRev(_kindId, _kindRev);
+        if (kindRev == 0) revert KindRevUnavailable();
+
+        desc = Descriptor({traits: 0, rev: 1, setRev: setRev, kindRev: kindRev, kindId: _kindId, setId: setId});
         bytes32[] memory elems = new bytes32[](1);
-        elems[0] = _roll();
+        elems[0] = _random();
 
         _create(to, id, desc, elems);
         _postCreate(to, id, desc, elems);
     }
 
-    function roll(uint64 id, uint256 face) external returns (Descriptor memory od) {
+    function roll(uint64 id, uint256 face) external returns (Descriptor memory desc) {
         bytes32[] memory elems = new bytes32[](1);
         elems[0] = bytes32(face);
-        od = _update(id, elems);
-        _postUpdate(id, od, elems);
+        desc = _update(id, elems);
+        _postUpdate(id, desc, elems);
     }
 
-    function roll(uint64 id) external returns (Descriptor memory od) {
+    function roll(uint64 id) external returns (Descriptor memory desc) {
         bytes32[] memory elems = new bytes32[](1);
-        elems[0] = _roll();
-        od = _update(id, elems);
-        _postUpdate(id, od, elems);
+        elems[0] = _random();
+        desc = _update(id, elems);
+        _postUpdate(id, desc, elems);
     }
 
-    function _roll() internal view returns (bytes32) {
+    function _random() internal view returns (bytes32) {
         /// forge-lint: disable-next-item(asm-keccak256)
         return keccak256(abi.encodePacked(block.prevrandao, tx.origin, gasleft()));
-    }
-
-    function supportsInterface(bytes4 interfaceId) external pure override(SetSolo, SetRegistryHook) returns (bool) {
-        return interfaceId == type(ISetRegistryHook).interfaceId || SetSolo._supportsInterface(interfaceId);
-    }
-
-    /// forge-lint: disable-next-item(mixed-case-function)
-    function _objectURI() internal view virtual override returns (string memory) {
-        ISetRegistry setr = ISetRegistry(SetContext.getSetRegistry());
-        return setr.setURI(SetContext.getSetId());
     }
 }

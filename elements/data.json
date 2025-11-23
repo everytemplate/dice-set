@@ -1,5 +1,5 @@
 {
-  "name": "Awesome Dice",
-  "description": "Awesome dice description",
-  "picture": "matter://0x22a8c240a1f908ecb711fd3d51c9a1a4d2812766a428dc051d3e8b91695907ce"
+  "name": "Dice Set",
+  "description": "A simple onchain dice built on top of Every Protocol.",
+  "picture": "matter://0x2b2683c590f94e771a002eb1cd4b41500997d480b28298a75ddbf021c8e876c5"
 }
